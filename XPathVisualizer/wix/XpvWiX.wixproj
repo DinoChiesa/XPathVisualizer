@@ -1,0 +1,70 @@
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>3.0</ProductVersion>
+    <ProjectGuid>{BCE5BDB3-C058-49F5-94FA-B048FF7E5B65}</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>XPathVisualizer-v1.3</OutputName>
+    <OutputType>Package</OutputType>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <DefineSolutionProperties>false</DefineSolutionProperties>
+  </PropertyGroup>
+<!--
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+-->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+    <Compile Include="UI.wxs" />
+    <Compile Include="CustomActions.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <Name>WixUIExtension</Name>
+      <HintPath>$(ProgramFileS)\Windows Installer XML v3.5\bin\WixUIExtension.dll</HintPath>
+    </WixExtension>
+    <WixExtension Include="WixUtilExtension">
+      <Name>WixUtilExtension</Name>
+      <HintPath>$(ProgramFileS)\Windows Installer XML v3.5\bin\WixUtilExtension.dll</HintPath>
+    </WixExtension>
+    <WixExtension Include="WixNetFxExtension">
+      <Name>WixNetFxExtension</Name>
+      <HintPath>$(ProgramFileS)\Windows Installer XML v3.5\bin\WixNetFxExtension.dll</HintPath>
+    </WixExtension>
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+  <!--  To modify your build process, add your task inside one of the targets below and uncomment it.
+        Other similar extension points exist, see Wix.targets.
+
+  <Target Name="BeforeBuild">
+  </Target>
+  -->
+  <Target Name="AfterBuild">
+    <Message Text="Post Processing the MSI..." />
+    <Message Text="TargetFileName= $(TargetFileName)" />
+    <Exec Command="&quot;$(SystemRoot)\System32\cscript.exe&quot; PostProcessMsi.js &quot;$(OutputPath)$(TargetFileName)&quot; " />
+  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\MergedTool\MergedTool.csproj">
+      <Project>{A58A7386-755C-4DF9-A27B-FA2832530BDB}</Project>
+      <Name>Merged Tool</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

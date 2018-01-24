@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <Fragment>
+
+<!--
+    <Binary Id="B.JavaScript" SourceFile="CustomActions.js" />
+-->
+
+    <!-- CA to launch the app -->
+    <CustomAction Id         ="CA.LaunchApp"
+                  Directory  ="INSTALLDIR"
+                  ExeCommand ="[INSTALLDIR]XPathVisualizer.exe"
+                  Execute    ="immediate"
+                  Return     ="asyncNoWait" />
+
+  </Fragment>
+
+</Wix>
+

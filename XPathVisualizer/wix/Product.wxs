@@ -1,0 +1,187 @@
+<?xml version='1.0'?>
+<Wix xmlns      = 'http://schemas.microsoft.com/wix/2006/wi'
+     xmlns:netfx= 'http://schemas.microsoft.com/wix/NetFxExtension'
+     xmlns:util = 'http://schemas.microsoft.com/wix/UtilExtension'
+     >
+
+<!-- Keep the UpgradeCode constant for the lifetime of the product family, -->
+<!-- if you want to support upgrades.  Change the ProductId (in MSI parlance, it's -->
+<!-- the ProductCode) when changing minor versions.  -->
+<!-- -->
+
+<!-- http://stackoverflow.com/questions/1838009/platform/1860161#1860161 -->
+
+  <?define msiManufacturer = "Dino Chiesa" ?>
+  <?define pkgDescription = "Ionic's XPath Visualizer v1.3" ?>
+  <?define msiProductId = "af6e890c-ded5-4bbb-9310-fab54e46d28c" ?>
+  <?define sysfolder = "[SystemFolder]" ?>
+  <?define programFilesFolder = "ProgramFilesFolder" ?>
+  <?define guidMain = "d6c4b7e6-ead9-4e7c-8921-b84d30b29ade" ?>
+  <?define guidTxtFiles = "d6c4b7e6-ead9-4e7c-8921-b84d30b29add" ?>
+  <?define guidRegistry = "d6c4b7e6-ead9-4e7c-8921-b84d30b29adc" ?>
+  <?define guidShortcuts = "d6c4b7e6-ead9-4e7c-8921-b84d30b29adb" ?>
+
+  <Product Id           ='$(var.msiProductId)'
+           Name         ="Ionic's XPath Visualizer v1.3"
+           Language     ='1033'
+           UpgradeCode  ='F6792511-D075-4D05-A5ED-5CCE545BC9D2'
+           Version      ='1.3.0.5'
+           Manufacturer ='$(var.msiManufacturer)'>
+
+    <Package Id               ='*'
+             Description      ='$(var.pkgDescription)'
+             Comments         ='Produced: 11 June 2011'
+             Manufacturer     ='$(var.msiManufacturer)'
+             InstallerVersion ='200'
+             Compressed       ='yes' />
+
+    <!-- Must specify the Platform attribute here.
+         For an alternative, see the -arch flag on candle.exe .
+         http://www.joyofsetup.com/2010/05/14/working-hard-or-hardly-working/ -->
+
+
+    <!-- need a Media element to specify the source for installation.
+         EmbedCab='yes' implies that this cab will be stuffed into the
+         MSI file, which is what we want, usually.
+
+         The Cabinet name can be anything you want. Not really important.
+
+      -->
+    <Media Id='1' Cabinet='product.cab' EmbedCab='yes' />
+
+    <Property Id="PRIORINSTALL">
+      <RegistrySearch Id   ='XpathVisualizerRegistry'
+                      Type ='raw'
+                      Root ='HKLM'
+                      Key  ='Software\[Manufacturer]\XPathVisualizer'
+                      />
+    </Property>
+
+
+    <!-- http://wix.sourceforge.net/manual-wix3/check_for_dotnet.htm -->
+    <PropertyRef Id="NETFRAMEWORK35"/>
+    <PropertyRef Id="NETFRAMEWORK35_SP_LEVEL"/>
+
+    <!-- no install on Windows XP or Windows 2000 -->
+    <Condition Message="XPathVisualizer cannot be installed on this computer. It is supported on Windows Server 2003, Windows Vista, or later.">
+      <![CDATA[Installed OR (VersionNT >= 502)]]>
+    </Condition>
+
+    <Condition Message="This application requires .NET Framework 3.5 SP1 or later. Install this pre-requisite, then run this installer again.">
+    <![CDATA[Installed OR (NETFRAMEWORK35 AND NETFRAMEWORK35_SP_LEVEL AND NOT (NETFRAMEWORK35_SP_LEVEL = "#0"))]]>
+    </Condition>
+
+    <!-- d/l link for .NET 3.5sp1::   http://go.microsoft.com/fwlink/?LinkId=76617   -->
+
+    <Condition Message="This application requires Windows Installer 3.1 or later. Install this pre-requisite, then run this installer again.">
+      <![CDATA[VersionMsi >= "3.1"]]>
+    </Condition>
+
+
+
+    <InstallUISequence>
+
+      <!--
+      <Custom Action="CA.EnumerateWebSites"           After="CostFinalize" Overridable="yes">NOT Installed</Custom>
+      -->
+
+    </InstallUISequence>
+
+
+    <InstallExecuteSequence>
+      <!-- run the check for the IIS WMI Provider, early in the sequence -->
+      <!--
+      <Custom Action="CA.VerifyListWebSites"  After="AppSearch" Overridable="yes">NOT Installed or Installed</Custom>
+      -->
+
+    </InstallExecuteSequence>
+
+<!-- http://wix.sourceforge.net/manual-wix3/create_an_uninstall_shortcut.htm -->
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+
+      <Directory Id='$(var.programFilesFolder)' Name='PFiles'>
+        <Directory Id='CompanyDir' Name='$(var.msiManufacturer)'>
+          <Directory Id='INSTALLDIR' Name='XPathVisualizer 1.3'>
+          </Directory>
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="D.FolderForShortcuts" Name="XPathVisualizer"/>
+      </Directory>
+
+    </Directory>
+
+
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id='C.Main' Guid="$(var.guidMain)" >
+        <File Id      ='XpathVisualizer.exe'
+              Name    ='XpathVisualizer.exe'
+              DiskId  ='1'
+              Source  ='..\MergedTool\bin\$(var.Configuration)\XpathVisualizer.exe'
+              KeyPath ='yes'/>
+      </Component>
+
+      <Component Id='C.Textfiles' Guid="$(var.guidTxtFiles)" >
+        <File Id='License.rtf' Name='License.rtf'      DiskId='1' Source='..\License.rtf' />
+        <File Id='Help'        Name='Help.rtf'         DiskId='1' Source='..\Tool\Help.rtf'   />
+      </Component>
+
+      <Component Id='C.Registry' Guid="$(var.guidRegistry)" >
+        <RegistryKey Root='HKLM' Key='Software\[Manufacturer]\XPathVisualizer'>
+          <RegistryValue Type='string'                Value=''              KeyPath='yes' />
+          <RegistryValue Type='string' Name='Version' Value='1.3'/>
+          <RegistryValue Type="string" Name="Path" Value="[INSTALLDIR]"/>
+        </RegistryKey>
+      </Component>
+
+    </DirectoryRef>
+
+
+    <DirectoryRef Id="D.FolderForShortcuts">
+      <Component Id="C.Shortcuts" Guid="$(var.guidShortcuts)" >
+        <!-- the shortcut to the app -->
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="XPathVisualizer"
+                  Description="Visualizer for XPath queries"
+                  Target="[INSTALLDIR]XPathVisualizer.exe"
+                  WorkingDirectory="INSTALLDIR"/>
+
+        <!-- the uninstall shortcut to the installer package -->
+        <Shortcut Id="UninstallProduct"
+                  Name="Uninstall XPathVisualizer"
+                  Description="Uninstalls XPathVisualizer"
+                  Target="$(var.sysfolder)msiexec.exe"
+                  Arguments="/x [ProductCode]"/>
+                <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+                <RegistryValue Root="HKCU"
+                               Key='Software\[Manufacturer]\XPathVisualizer'
+                               Name="installed" Type="integer" Value="1"
+                               KeyPath="yes"/>
+           </Component>
+        </DirectoryRef>
+
+
+
+    <Feature Id='F.Complete'
+             Title='XPathVisualizer'
+             Description='The complete package: everything that can be installed.'
+             Level='1'
+             AllowAdvertise='no'
+             Display='expand'
+             ConfigurableDirectory='INSTALLDIR'>
+        <ComponentRef Id='C.Main' />
+        <ComponentRef Id='C.Textfiles' />
+        <ComponentRef Id='C.Shortcuts' />
+        <ComponentRef Id='C.Registry' />
+
+      </Feature>
+
+    <UIRef Id="XpvInstallUI" />
+
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Run XPathVisualizer now?" />
+
+  </Product>
+</Wix>
+
